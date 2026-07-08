@@ -178,30 +178,42 @@ class _BeltScreenState extends State<BeltScreen> {
                 style: const TextStyle(color: Colors.white54, fontSize: 12),
               ),
               onTap: () {
-                Belt? selectedBelt;
-                try {
-                  // Szukamy w bazie danych pasa, który w nazwie ma np. "2 KYU"
-                  selectedBelt = KarateData.oyamaAdultBelts.firstWhere(
-                        (b) => b.name.contains(rank.name),
-                  );
-                } catch (e) {
-                  selectedBelt = null;
-                }
+                // Sprawdzamy, w jakim jesteśmy stylu
+                bool isOyama = widget.styleName == AppDictionary.oyamaKarate;
 
-                if (selectedBelt != null) {
-                  // Jeśli znaleziono wymagania, przechodzimy do nowego ekranu
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BeltDetailScreen(belt: selectedBelt!),
-                    ),
-                  );
+                if (isOyama) {
+                  // LOGIKA DLA OYAMA (Szukamy w bazie)
+                  Belt? selectedBelt;
+                  try {
+                    selectedBelt = KarateData.oyamaAdultBelts.firstWhere(
+                          (b) => b.name.contains(rank.name),
+                    );
+                  } catch (e) {
+                    selectedBelt = null;
+                  }
+
+                  if (selectedBelt != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BeltDetailScreen(belt: selectedBelt!),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Wymagania dla tego stopnia nie zostały jeszcze dodane.'),
+                        backgroundColor: Colors.grey,
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  }
                 } else {
-                  // Jeśli wymagań nie ma w bazie, wyświetlamy dymek u dołu ekranu
+                  // LOGIKA DLA KYOKUSHIN (Zablokowana na czas tworzenia Oyama)
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Wymagania dla tego stopnia nie zostały jeszcze dodane.'),
-                      backgroundColor: Colors.grey,
+                      content: Text('Szczegółowe wymagania Kyokushin pojawią się w kolejnej aktualizacji!'),
+                      backgroundColor: Colors.blueGrey,
                       duration: Duration(seconds: 2),
                     ),
                   );
