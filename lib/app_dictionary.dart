@@ -46,5 +46,13 @@ class AppDictionary {
   static String get under14 => isPolish ? 'DO 14 LAT' : 'UNDER 14 YEARS';
   static String get adults => isPolish ? 'DOROŚLI' : 'ADULTS';
 
+  // Sekcje egzaminacyjne i adnotacje
+  static const String requiredTrainingPeriod = "Wymagany okres treningów";
+  static const String minimumAge16 = "Kandydat musi mieć ukończone 16 lat";
+  static const String kicks = "Kopnięcia";
+  static const String formalKatas = "Układy formalne";
+  static const String weaponKatas = "Układy formalne z bronią";
+  static const String taskKumite = "Kumite zadaniowe";
+  static const String notPartOfExam = "* Nie jest częścią egzaminu";
 }
 

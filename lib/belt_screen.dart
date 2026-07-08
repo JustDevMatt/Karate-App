@@ -4,6 +4,7 @@ import 'app_dictionary.dart';
 import 'karate_data.dart';      // Importujemy naszą bazę danych
 import 'realistic_belt.dart';   // Importujemy nasz graficzny pas
 import 'kata_detail_screen.dart';
+import 'belt_detail_screen.dart';
 
 class BeltScreen extends StatefulWidget {
   final String styleName;
@@ -177,8 +178,34 @@ class _BeltScreenState extends State<BeltScreen> {
                 style: const TextStyle(color: Colors.white54, fontSize: 12),
               ),
               onTap: () {
-                // Tu w przyszłości dodamy przejście do ekranu z nagraniami konkretnych wymagań
-                print("Kliknięto szczegóły dla: ${rank.name}");
+                Belt? selectedBelt;
+                try {
+                  // Szukamy w bazie danych pasa, który w nazwie ma np. "2 KYU"
+                  selectedBelt = KarateData.oyamaAdultBelts.firstWhere(
+                        (b) => b.name.contains(rank.name),
+                  );
+                } catch (e) {
+                  selectedBelt = null;
+                }
+
+                if (selectedBelt != null) {
+                  // Jeśli znaleziono wymagania, przechodzimy do nowego ekranu
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BeltDetailScreen(belt: selectedBelt!),
+                    ),
+                  );
+                } else {
+                  // Jeśli wymagań nie ma w bazie, wyświetlamy dymek u dołu ekranu
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Wymagania dla tego stopnia nie zostały jeszcze dodane.'),
+                      backgroundColor: Colors.grey,
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                }
               },
             );
           }).toList(),

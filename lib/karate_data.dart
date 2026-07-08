@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'app_dictionary.dart';
 
 // Klasa reprezentująca konkretny stopień (np. 9 KYU junior)
 class Rank {
@@ -14,6 +15,8 @@ class Rank {
     this.mainStripe,
   });
 }
+
+
 
 // Klasa grupująca stopnie pod jednym kolorem pasa
 class BeltGroup {
@@ -65,6 +68,16 @@ class KataCategory {
   final List<Kata> katas;
 
   KataCategory({required this.title, required this.katas});
+}
+
+class Belt {
+  final String name;
+  final Map<String, List<String>> requirements;
+
+  Belt({
+    required this.name,
+    required this.requirements,
+  });
 }
 
 
@@ -129,7 +142,6 @@ class KarateData {
       ],
     ),
   ];
-
 
   // OYAMA - DOROŚLI (Zgodnie z książeczką)
   static List<BeltGroup> oyamaSeniorBelts = [
@@ -240,6 +252,64 @@ class KarateData {
         Rank(name: '2 KYU', description: '(brązowy pas)'),
         Rank(name: '1 KYU', description: '(brązowy pas z czarnym pagonem)', mainStripe: Colors.black),
       ],
+    ),
+  ];
+
+  // ==========================================
+  // LISTA WYMAGAŃ NA PASY (DOROŚLI OYAMA)
+  // ==========================================
+  static List<Belt> oyamaAdultBelts = [
+
+    // --- Wymagania 2 KYU ---
+    Belt(
+      name: '2 KYU (brązowy pas)',
+      requirements: {
+        AppDictionary.requiredTrainingPeriod: [
+          '9 miesięcy',
+        ],
+        AppDictionary.kicks: [
+          'USHIRO-MAWASHI-GERI-JODAN z pozycji walki',
+        ],
+        AppDictionary.formalKatas: [
+          'Kihon-Kata-Sono-Hachi (8)',
+        ],
+        AppDictionary.weaponKatas: [
+          'Tonfa-Kihon-Sono-Ichi',
+          'Tonfa-Kihon-Sono-Ni',
+          'Bo-Kihon-Sono-Ichi',
+          'Bo-Kihon-Sono-Ni',
+        ],
+        AppDictionary.taskKumite: [
+          'Walka ze zmieniającymi się partnerami: 10 x 2 minuty',
+        ],
+      },
+    ),
+
+    // --- Wymagania 1 KYU ---
+    Belt(
+      name: '1 KYU (brązowy pas z 1 czarnym pagonem)',
+      requirements: {
+        AppDictionary.requiredTrainingPeriod: [
+          '9-12 miesięcy',
+          AppDictionary.minimumAge16,
+        ],
+        AppDictionary.kicks: [
+          'USHIRO-MAWASHI-GERI-GEDAN z pozycji walki',
+          'USHIRO-TOBI-GERI-CHUDAN',
+          'USHIRO-MAWASHI-TOBI-GERI-JODAN (${AppDictionary.notPartOfExam})',
+        ],
+        AppDictionary.formalKatas: [
+          'Kai-Ha',
+          'Kumite-No-Kata-Sono-San (3)',
+        ],
+        AppDictionary.weaponKatas: [
+          'Tonfa-Kihon-Sono-San',
+          'Tsion (Bo)',
+        ],
+        AppDictionary.taskKumite: [
+          'Walka ze zmieniającymi się partnerami: 12 x 2 min',
+        ],
+      },
     ),
   ];
   // ==========================================
@@ -354,4 +424,6 @@ class KarateData {
         ]
     ),
   ];
+
+
 }
