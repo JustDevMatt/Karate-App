@@ -25,14 +25,15 @@ class _BeltScreenState extends State<BeltScreen> {
   }
 
   // Ta funkcja decyduje, co wyświetlić na środku ekranu
+  // Ta funkcja decyduje, co wyświetlić na środku ekranu
   Widget _buildBody() {
     switch (_selectedIndex) {
       case 0:
-        return _buildKataSection(); // Zmieniamy z Text() na nową funkcję
+        return _buildKataSection();
       case 1:
-        return _buildRequirementsSection(); // Nasz nowy, potężny system pasów!
+        return _buildRequirementsSection();
       case 2:
-        return Center(child: Text(AppDictionary.techSection(widget.styleName), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 18)));
+        return _buildTechniquesSection(); // <--- Zmiana tutaj! Ładujemy naszą nową sekcję
       case 3:
         return Center(child: Text(AppDictionary.flashSection(widget.styleName), textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70, fontSize: 18)));
       default:
@@ -223,6 +224,173 @@ class _BeltScreenState extends State<BeltScreen> {
           }).toList(),
         );
       },
+    );
+  }
+
+  // ==========================================================
+  // WYSUWANY PANEL DLA TECHNIKI (Identyczny jak w Wymaganiach)
+  // ==========================================================
+  void _showTechniqueBottomSheet(BuildContext context, {
+    required String title,
+    required String translation,
+    required String description,
+    required String imagePath,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25.0)),
+      ),
+      builder: (BuildContext context) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(20, 15, 20, MediaQuery.of(context).padding.bottom + 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 50, height: 5,
+                  decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)),
+                ),
+              ),
+              const SizedBox(height: 25),
+              Text(title, style: const TextStyle(color: Colors.amber, fontSize: 26, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(translation, style: const TextStyle(color: Colors.white54, fontSize: 16, fontStyle: FontStyle.italic)),
+              const SizedBox(height: 20),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: Image.asset(
+                  imagePath,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    height: 200, color: Colors.black45,
+                    child: const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.image_not_supported, color: Colors.white24, size: 50),
+                          SizedBox(height: 10),
+                          Text('Brak obrazka', style: TextStyle(color: Colors.white54)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(description, style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.5)),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  // ==============================================================
+  // BUDOWA SEKCJI TECHNIKI (Zakładki przewijane na boki + Kafelki)
+  // ==============================================================
+  Widget _buildTechniquesSection() {
+    // Pobieramy naszą nową bazę technik z karate_data.dart
+    List<TechniqueCategory> categories = KarateData.oyamaTechniques;
+
+    return DefaultTabController(
+      length: categories.length,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Pasek zakładek (scrollowany)
+          TabBar(
+            isScrollable: true, // To sprawia, że można je przesuwać palcem w prawo/lewo!
+            tabAlignment: TabAlignment.start, // Wyrównanie do lewej strony
+            indicatorColor: Colors.amber,
+            labelColor: Colors.amber,
+            unselectedLabelColor: Colors.grey,
+            tabs: categories.map((cat) => Tab(text: cat.title.toUpperCase())).toList(),
+          ),
+          // Listy kafelków dla każdej zakładki
+          Expanded(
+            child: TabBarView(
+              children: categories.map((cat) {
+                return ListView.builder(
+                  padding: const EdgeInsets.all(12.0),
+                  itemCount: cat.techniques.length,
+                  itemBuilder: (context, index) {
+                    final tech = cat.techniques[index];
+                    return Card(
+                      color: const Color(0xFF1E1E1E),
+                      elevation: 4,
+                      margin: const EdgeInsets.only(bottom: 12.0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () => _showTechniqueBottomSheet(
+                          context,
+                          title: tech.name,
+                          translation: tech.translation,
+                          description: tech.description,
+                          imagePath: tech.imagePath,
+                        ),
+                        child: Row(
+                          children: [
+                            // ZDJĘCIE PO LEWEJ
+                            ClipRRect(
+                              borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                              child: Container(
+                                color: Colors.white, // Białe tło dla starych rycin
+                                child: Image.asset(
+                                  tech.imagePath,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.contain, // Nie obcina rysunku, dopasowuje go do kwadratu
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    width: 100, height: 100, color: Colors.black45,
+                                    child: const Icon(Icons.image_not_supported, color: Colors.white24),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            // TEKSTY PO PRAWEJ
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      tech.name,
+                                      style: const TextStyle(color: Colors.amber, fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      tech.translation,
+                                      style: const TextStyle(color: Colors.white70, fontSize: 14),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    const Text(
+                                      "Kliknij po szczegóły >",
+                                      style: TextStyle(color: Colors.white30, fontSize: 12, fontStyle: FontStyle.italic),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

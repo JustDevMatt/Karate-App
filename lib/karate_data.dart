@@ -16,8 +16,6 @@ class Rank {
   });
 }
 
-
-
 // Klasa grupująca stopnie pod jednym kolorem pasa
 class BeltGroup {
   final String colorName;
@@ -31,7 +29,7 @@ class BeltGroup {
   });
 }
 
-// --- NOWA KLASA DLA POJEDYNCZEGO RUCHU ---
+// --- NOWA KLASA DLA POJEDYNCZEGO RUCHU W KATA (VIDEO) ---
 class KataMove {
   final String instruction;
   final double? startSeconds;  // Zmiana z int na double (pozwala na ułamki, np. 16.5)
@@ -51,7 +49,7 @@ class Kata {
   final String? startPosition;
   final List<KataMove> moves;
   final String? endPosition;
-  final String? youtubeUrl;    // <-- TO MUSI TU BYĆ
+  final String? youtubeUrl;    // <-- TO MUSI TU BYĆ, aby działało wyświetlanie filmików z youtuba do kata
 
   Kata({
     required this.name,
@@ -59,7 +57,7 @@ class Kata {
     this.startPosition,
     this.moves = const [],
     this.endPosition,
-    this.youtubeUrl, // <-- ORAZ TO MUSI BYĆ TUTAJ
+    this.youtubeUrl, // <-- ORAZ TO MUSI BYĆ TUTAJ, aby działało wyświetlanie filmików z youtuba do kata
   });
 }
 
@@ -80,6 +78,33 @@ class Belt {
   });
 }
 
+// ==========================================
+// STRUKTURA DANYCH DLA TECHNIK
+// ==========================================
+
+class Technique {
+  final String name;
+  final String translation;
+  final String description;
+  final String imagePath;
+
+  Technique({
+    required this.name,
+    required this.translation,
+    required this.description,
+    required this.imagePath,
+  });
+}
+
+class TechniqueCategory {
+  final String title;
+  final List<Technique> techniques;
+
+  TechniqueCategory({
+    required this.title,
+    required this.techniques,
+  });
+}
 
 class KarateData {
   // ==========================================
@@ -89,14 +114,14 @@ class KarateData {
   // OYAMA - DO 14 LAT
   static List<BeltGroup> oyamaJuniorBelts = [
     BeltGroup(
-      colorName: 'BIAŁY PAS',
+      colorName: 'BIAŁY PAS', //TUTAJ MOŻE SIĘ ZMIENIĆ PAS I PAGONY W NAJBLIŻSZYM CZASIE - FLAGA DLA MNIEEEEEEE
       beltColor: Colors.white,
       ranks: [
-        Rank(name: '10 KYU', description: '(biały pas)'),
-        Rank(name: '9 KYU junior', description: '(biały pas z czerwonym pagonem)', redStripes: 1),
-        Rank(name: '9 KYU senior', description: '(biały pas z 2 czerwonymi pagonami)', redStripes: 2),
-        Rank(name: '8 KYU junior', description: '(biały pas z 3 czerwonymi pagonami)', redStripes: 3),
-      ],
+        Rank(name: '10 KYU', description: '(biały pas z czerwonym pagonem)', redStripes: 1),
+        Rank(name: '9 KYU junior', description: '(biały pas z 2 czerwonymi pagonami)', redStripes: 2),
+        Rank(name: '9 KYU senior', description: '(biały pas z 3 czerwonymi pagonami)', redStripes: 3),
+        Rank(name: '8 KYU junior', description: '(biały pas z 4 czerwonymi pagonami)', redStripes: 4),
+        ],
     ),
     BeltGroup(
       colorName: 'NIEBIESKI PAS',
@@ -425,5 +450,119 @@ class KarateData {
     ),
   ];
 
-
+  // ==========================================
+  // BAZA TECHNIK (MVP z książeczki 2010)
+  // ==========================================
+  static final List<TechniqueCategory> oyamaTechniques = [
+    TechniqueCategory(
+      title: "Broń Karate",
+      techniques: [
+        Technique(
+          name: "SEIKEN",
+          translation: "Pięść",
+          description: "Podstawowa broń w karate. Uderza się powierzchnią dwóch pierwszych kostek (wskazującego i środkowego palca). Kciuk musi mocno dopinać zaciśnięte palce od dołu.",
+          imagePath: "assets/images/tech_seiken.png",
+        ),
+        Technique(
+          name: "URAKEN",
+          translation: "Odwrócona pięść",
+          description: "Uderzenie 'grzbietem' pięści, najczęściej wykonywane z dużą szybkością po łuku. Wykorzystywane do szybkich ataków na korpus przeciwnika.",
+          imagePath: "assets/images/tech_uraken.png",
+        ),
+        Technique(
+          name: "HIZA",
+          translation: "Kolano",
+          description: "Bardzo potężna broń w półdystansie i zwarciu. Uderzenie kolanem (Hiza-geri) potrafi wygenerować ogromną siłę, szczególnie przy ściągnięciu głowy/korpusu przeciwnika w dół.",
+          imagePath: "assets/images/tech_hiza.png",
+        ),
+      ],
+    ),
+    TechniqueCategory(
+      title: "Pozycje",
+      techniques: [
+        Technique(
+          name: "Zenkutsu-dachi",
+          translation: "Pozycja wykroczna",
+          description: "Ciężar ciała w 70% na nodze przedniej, mocno ugiętej. Noga tylna prosta, stopa skręcona lekko na zewnątrz. Bardzo stabilna pozycja do silnych ataków w przód.",
+          imagePath: "assets/images/tech_zenkutsu.png",
+        ),
+        Technique(
+          name: "Kiba-dachi",
+          translation: "Pozycja jeźdźca",
+          description: "Ciężar ciała rozłożony równomiernie (50/50) na obu nogach. Stopy równoległe, kolana mocno ugięte i wypchnięte na zewnątrz. Przypomina dosiadanie konia.",
+          imagePath: "assets/images/tech_kiba.png",
+        ),
+        Technique(
+          name: "Kokutsu-dachi",
+          translation: "Pozycja zakroczna",
+          description: "Ciężar ciała przeniesiony w 70% na nogę tylną. Przednia noga opiera się lekko na chusoku (poduszce stopy). Idealna pozycja do blokowania i szybkich kontrataków z przedniej nogi.",
+          imagePath: "assets/images/tech_kokutsu.png",
+        ),
+      ],
+    ),
+    TechniqueCategory(
+      title: "Techniki ręczne",
+      techniques: [
+        Technique(
+          name: "Gedan-barai",
+          translation: "Blok dolny",
+          description: "Podstawowy blok przedłużonym ramieniem przed kopnięciami w strefę dolną. Ruch rozpoczyna się od przeciwnego ucha i idzie łukiem w dół nad kolano.",
+          imagePath: "assets/images/tech_gedan_barai.png",
+        ),
+        Technique(
+          name: "Jodan-uke",
+          translation: "Blok górny",
+          description: "Blok chroniący głowę przed uderzeniami z góry. Przedramię unosi się nad czoło pod kątem, by cios ześlizgnął się po ręce.",
+          imagePath: "assets/images/tech_jodan_uke.png",
+        ),
+        Technique(
+          name: "Seiken-chudan-tsuki",
+          translation: "Cios prosty (strefa środkowa)",
+          description: "Klasyczne uderzenie proste pięścią z biodra na wysokość splotu słonecznego. Wymaga mocnego skrętu bioder i jednoczesnego wycofania drugiej ręki do hikite.",
+          imagePath: "assets/images/tech_seiken_tsuki.png",
+        ),
+      ],
+    ),
+    TechniqueCategory(
+      title: "Kopnięcia",
+      techniques: [
+        Technique(
+          name: "Mae-geri-jodan",
+          translation: "Kopnięcie w przód na głowę",
+          description: "Wyprowadzenie wysokiego kopnięcia prosto przed siebie. Kluczowe jest mocne podciągnięcie kolana do klatki piersiowej przed wyprostem nogi.",
+          imagePath: "assets/images/tech_mae_geri.png",
+        ),
+        Technique(
+          name: "Mawashi-geri-jodan",
+          translation: "Kopnięcie okrężne na głowę",
+          description: "Jedna z najskuteczniejszych technik w walce. Kopnięcie po łuku, trafiające w głowę lub szyję przeciwnika. Wymaga doskonałej elastyczności i skrętu biodra stopy podporowej.",
+          imagePath: "assets/images/tech_mawashi_geri.png",
+        ),
+        Technique(
+          name: "Ushiro-geri",
+          translation: "Kopnięcie w tył",
+          description: "Bardzo silne kopnięcie wykonywane piętą w tył. Często stosowane po obrocie jako technika zaskakująca. Wymaga spojrzenia przez ramię przed trafieniem.",
+          imagePath: "assets/images/tech_ushiro_geri.png",
+        ),
+      ],
+    ),
+    TechniqueCategory(
+      title: "Inne",
+      techniques: [
+        Technique(
+          name: "Wiązanie pasa",
+          translation: "Tradycyjny węzeł Obi",
+          description: "Pas w Karate to symbol wiedzy i ciężkiej pracy. Należy go wiązać tak, by oba końce po zawiązaniu węzła miały identyczną długość. Węzeł powinien być płaski i mocny.",
+          imagePath: "assets/images/tech_wiazanie_pasa.png",
+        ),
+        Technique(
+          name: "Składanie Karate Gi",
+          translation: "Szacunek do stroju",
+          description: "Dogi składa się w specyficzny sposób, formując z niego estetyczną kostkę lub zawijając w pas. Wyraża to szacunek do dyscypliny i zapobiega gnieceniu się materiału.",
+          imagePath: "assets/images/tech_skladanie_gi.png",
+        ),
+      ],
+    ),
+  ];
 }
+

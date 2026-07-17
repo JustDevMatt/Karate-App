@@ -15,7 +15,7 @@ class RealisticBelt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Określamy, czy pas jest ciemny, czy jasny, aby dobrać kolor węzła i cieni
-    bool isDarkBelt = beltColor.computeLuminance() < 0.3;
+    bool isDarkBelt = beltColor.computeLuminance() < 0.3; // computeLuminance zwraca jasność w skali: 0 (czarny) - 1 (biały)
 
     return Container(
       width: 140,
