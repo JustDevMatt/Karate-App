@@ -5,6 +5,7 @@ import 'karate_data.dart';      // Importujemy naszą bazę danych
 import 'realistic_belt.dart';   // Importujemy nasz graficzny pas
 import 'kata_detail_screen.dart';
 import 'belt_detail_screen.dart';
+import 'history_screen.dart';
 
 class BeltScreen extends StatefulWidget {
   final String styleName;
@@ -440,9 +441,15 @@ class _BeltScreenState extends State<BeltScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.book, color: Colors.amber),
-              title: Text(AppDictionary.clubHistory, style: const TextStyle(color: Colors.white, fontSize: 16)),
+              title: Text(AppDictionary.styleHistory, style: const TextStyle(color: Colors.white, fontSize: 16)),
               onTap: () {
+                // Zamykamy najpierw boczne menu
                 Navigator.pop(context);
+                // Przechodzimy do nowego ekranu historii
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HistoryScreen()),
+                );
               },
             ),
             ListTile(

@@ -13,7 +13,7 @@ class AppDictionary {
 
   // Menu Boczne (Drawer)
   static String get home => isPolish ? 'Wybór Stylu' : 'Home';
-  static String get clubHistory => isPolish ? 'Historia Klubu' : 'Club History';
+  static String get styleHistory => isPolish ? 'Historia Stylu' : 'Style History';
   static String get news => isPolish ? 'Okiem Sportowca' : 'Karate News';
   static String get newsSubtitle => isPolish ? 'Wiadomości ze świata Karate' : 'News from the Karate world';
   static String get support => isPolish ? 'Postaw mi kawę' : 'Buy me a coffee';
