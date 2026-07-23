@@ -6,6 +6,7 @@ import 'realistic_belt.dart';   // Importujemy nasz graficzny pas
 import 'kata_detail_screen.dart';
 import 'belt_detail_screen.dart';
 import 'history_screen.dart';
+import 'package:url_launcher/url_launcher.dart'; //Do linków poza aplikację
 
 class BeltScreen extends StatefulWidget {
   final String styleName;
@@ -432,6 +433,7 @@ class _BeltScreenState extends State<BeltScreen> {
               decoration: BoxDecoration(color: Colors.black),
               child: Icon(Icons.sports_martial_arts, color: Colors.amber, size: 60),
             ),
+            //Wybór stylu karate
             ListTile(
               leading: const Icon(Icons.home, color: Colors.amber),
               title: Text(AppDictionary.home, style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -439,6 +441,7 @@ class _BeltScreenState extends State<BeltScreen> {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
             ),
+            //Historia Stylu
             ListTile(
               leading: const Icon(Icons.book, color: Colors.amber),
               title: Text(AppDictionary.styleHistory, style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -452,21 +455,44 @@ class _BeltScreenState extends State<BeltScreen> {
                 );
               },
             ),
+            //Okiem sportowca
             ListTile(
               leading: const Icon(Icons.smart_display, color: Colors.redAccent),
               title: Text(AppDictionary.news, style: const TextStyle(color: Colors.white, fontSize: 16)),
               subtitle: Text(AppDictionary.newsSubtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
               onTap: () {
                 Navigator.pop(context);
+                // TODO: jak się zgodzi twórca, to dodam działający link. Na ten moment ten kafelek będzie widoczny, ale nie funkcjonalny.
               },
             ),
-            const Divider(color: Colors.white24),
+            //Postaw mi kawę
+            const Divider(color: Colors.white24), // Linia oddzielająca
             ListTile(
               leading: const Icon(Icons.local_cafe, color: Colors.amber),
               title: Text(AppDictionary.support, style: const TextStyle(color: Colors.white, fontSize: 16)),
               subtitle: Text(AppDictionary.supportSubtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
-              onTap: () {
+              onTap: () async {
                 Navigator.pop(context);
+
+                final Uri url = Uri.parse('https://buymeacoffee.com/justdevmatt');
+                // Od razu wymuszamy otwarcie zewnątrz. System sam zdecyduje (Aplikacja czy Przeglądarka)
+                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                  debugPrint('Nie udało się otworzyć linku: $url');
+                }
+              },
+            ),
+            const Divider(color: Colors.white24, thickness: 1), // Linia oddzielająca (opcjonalna, dla zachowania porządku) - nie mogę się zdecydować, czy zostawić ją czy nie
+            ListTile(
+              leading: const Icon(Icons.rocket_launch, color: Colors.amber),
+              title: Text(AppDictionary.developerProfile, style: const TextStyle(color: Colors.white, fontSize: 16)),
+              subtitle: Text(AppDictionary.developerProfileSubtitle, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              onTap: () async {
+                Navigator.pop(context);
+
+                final Uri url = Uri.parse('https://x.com/JustDevMatt');
+                if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+                  debugPrint('Nie udało się otworzyć linku: $url');
+                }
               },
             ),
           ],

@@ -18,6 +18,11 @@ class AppDictionary {
   static String get newsSubtitle => isPolish ? 'Wiadomości ze świata Karate' : 'News from the Karate world';
   static String get support => isPolish ? 'Postaw mi kawę' : 'Buy me a coffee';
   static String get supportSubtitle => isPolish ? 'Wsparcie projektu' : 'Support the project';
+  // --- ZAKŁADKA: X / TWITTER ---
+  static String get developerProfile => isPolish ? 'Inne moje projekty (X)' : 'My other projects (X)';
+  // Subtitle dla X
+  static String get developerProfileSubtitle => isPolish ? 'Profil twórcy aplikacji' : 'Follow my work on X';
+
 
   // Dolny Pasek (Bottom Navigation)
   static String get katas => isPolish ? 'KATA' : 'KATAS';
