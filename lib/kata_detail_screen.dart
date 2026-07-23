@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:video_player/video_player.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'karate_data.dart';
 
 class KataDetailScreen extends StatefulWidget {
@@ -14,91 +14,103 @@ class KataDetailScreen extends StatefulWidget {
 }
 
 class _KataDetailScreenState extends State<KataDetailScreen> {
-  YoutubePlayerController? _controller;
+  VideoPlayerController? _controller;
+  final YoutubeExplode _yt = YoutubeExplode();
+
+  bool _isLoading = true;
+  bool _hasError = false;
+
   double? _startSeconds;
   double? _endSeconds;
-  Timer? _positionTimer;
-
-  String? _extractVideoId(String url) {
-    try {
-      if (url.contains('shorts/')) {
-        return url.split('shorts/').last.split('?').first.substring(0, 11);
-      }
-      RegExp regExp = RegExp(
-        r'.*(?:youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*',
-        caseSensitive: false,
-        multiLine: false,
-      );
-      final match = regExp.firstMatch(url);
-      if (match != null && match.groupCount >= 1 && match.group(1)!.length == 11) {
-        return match.group(1);
-      }
-    } catch (e) {
-      print("Nie udało się odczytać linku: $url");
-    }
-    return null;
-  }
 
   @override
   void initState() {
     super.initState();
+    _initVideo();
+  }
 
-    if (widget.kata.youtubeUrl != null) {
-      String? videoId = _extractVideoId(widget.kata.youtubeUrl!);
+  // MAGIA: Wyciągamy czysty plik MP4 z serwerów YouTube'a
+  Future<void> _initVideo() async {
+    try {
+      if (widget.kata.youtubeUrl == null || widget.kata.youtubeUrl!.isEmpty) {
+        throw Exception("Brak linku");
+      }
 
-      if (videoId != null) {
-        _controller = YoutubePlayerController.fromVideoId(
-          videoId: videoId,
-          autoPlay: false,
-          params: const YoutubePlayerParams(
-            showControls: false,
-            showFullscreenButton: true,
-            mute: false,
-            strictRelatedVideos: true,
-          ),
-        );
+      // 1. Pobieramy manifest wideo z YouTube
+      var videoId = VideoId(widget.kata.youtubeUrl!);
+      var manifest = await _yt.videos.streamsClient.getManifest(videoId);
 
-        _positionTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) async {
-          if (_controller != null && _endSeconds != null && _startSeconds != null) {
-            double currentTime = await _controller!.currentTime;
+      // 2. Wybieramy strumień wideo + audio o najwyższej jakości (często 720p)
+      var streamInfo = manifest.muxed.withHighestBitrate();
 
-            // Jeśli dotarliśmy do końca fragmentu, zapętl go
-            if (currentTime >= _endSeconds!) {
-              _controller!.seekTo(seconds: _startSeconds!, allowSeekAhead: true);
-            }
-          }
+      // 3. Ładujemy czysty plik do natywnego odtwarzacza
+      _controller = VideoPlayerController.networkUrl(streamInfo.url);
+
+      await _controller!.initialize();
+      await _controller!.setLooping(true); // Główne zapętlenie całego układu
+      await _controller!.play();
+
+      // Zamiast Timera używamy natywnego nasłuchiwacza klatek (ultra precyzja)
+      _controller!.addListener(_videoListener);
+
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Błąd ładowania surowego wideo: $e");
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
         });
       }
     }
   }
 
-  @override
-  void dispose() {
-    _positionTimer?.cancel();
-    _controller?.close();
-    super.dispose();
-  }
+  // Ultra-precyzyjne zapętlanie fragmentów (bez migania ekranu!)
+  void _videoListener() {
+    if (_controller == null || _startSeconds == null || _endSeconds == null) return;
 
-  // Uruchamia fragment
-  void _playFragment(BuildContext context, double start, double? end) {
-    if (_controller != null) {
-      setState(() {
-        _startSeconds = start;
-        _endSeconds = end;
-      });
-      _controller!.seekTo(seconds: start, allowSeekAhead: true);
-      _controller!.playVideo();
+    // Zabezpieczenie przed błędem, gdy odtwarzacz nie jest gotowy
+    if (!_controller!.value.isInitialized) return;
+
+    final position = _controller!.value.position.inMilliseconds;
+    final endMs = (_endSeconds! * 1000).toInt();
+    final startMs = (_startSeconds! * 1000).toInt();
+
+    // Jeśli przekroczyliśmy czas końcowy - błyskawiczny skok na początek
+    if (position >= endMs) {
+      _controller!.seekTo(Duration(milliseconds: startMs));
     }
   }
 
-  // Nowa funkcja: Kasuje "pułapkę" czasową
+  @override
+  void dispose() {
+    _controller?.removeListener(_videoListener);
+    _controller?.dispose();
+    _yt.close(); // Zamknięcie ekstraktora YouTube
+    super.dispose();
+  }
+
+  void _playFragment(BuildContext context, double start, double? end) {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    setState(() {
+      _startSeconds = start;
+      _endSeconds = end;
+    });
+
+    _controller!.seekTo(Duration(milliseconds: (start * 1000).toInt()));
+    _controller!.play();
+  }
+
   void _cancelLoop() {
     setState(() {
       _startSeconds = null;
       _endSeconds = null;
     });
-
-    // Opcjonalny dymek informacyjny
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Zapętlanie wyłączone. Możesz obejrzeć wideo normalnie.'),
@@ -108,13 +120,39 @@ class _KataDetailScreenState extends State<KataDetailScreen> {
     );
   }
 
+  void _toggleSpeed() {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    setState(() {
+      double currentSpeed = _controller!.value.playbackSpeed;
+      double newSpeed = currentSpeed == 1.0 ? 0.5 : 1.0;
+      _controller!.setPlaybackSpeed(newSpeed);
+    });
+  }
+
+  void _togglePlayPause() {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    setState(() {
+      if (_controller!.value.isPlaying) {
+        _controller!.pause();
+      } else {
+        _controller!.play();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Sprawdzamy na bieżąco status wideo, by ładnie renderować przyciski
+    bool isPlaying = _controller?.value.isPlaying ?? false;
+    double currentSpeed = _controller?.value.playbackSpeed ?? 1.0;
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         title: Text(
-          widget.kata.name,
+          widget.kata.name.toUpperCase(),
           style: GoogleFonts.oswald(
             textStyle: const TextStyle(color: Colors.amber, letterSpacing: 1.5),
           ),
@@ -124,32 +162,82 @@ class _KataDetailScreenState extends State<KataDetailScreen> {
       ),
       body: Column(
         children: [
-          // 1. ODTWARZACZ WIDEO
-          Container(
-            width: double.infinity,
-            color: Colors.black87,
-            child: _controller != null
-                ? YoutubePlayer(
-              controller: _controller!,
-              aspectRatio: 16 / 9,
-            )
-                : const SizedBox(
-              height: 220,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.videocam_off, color: Colors.white24, size: 60),
-                  SizedBox(height: 10),
-                  Text('Brak wideo dla tego Kata', style: TextStyle(color: Colors.white54)),
-                ],
+          // 1. CZYSTY NATYWNY ODTWARZACZ WIDEO
+          Stack(
+            children: [
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  color: Colors.black,
+                  child: _isLoading
+                      ? const Center(child: CircularProgressIndicator(color: Colors.amber))
+                      : _hasError
+                      ? const Center(
+                    child: Text(
+                      'Błąd ładowania wideo.\nSprawdź połączenie z siecią.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  )
+                      : VideoPlayer(_controller!),
+                ),
               ),
+
+              // Niewidzialna tarcza łapiąca stuknięcia (pauza/start bezpośrednio przez kliknięcie w film)
+              if (!_isLoading && !_hasError)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: _togglePlayPause,
+                    child: Container(
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+
+          // 2. BEZPIECZNY PASEK KONTROLNY
+          Container(
+            color: const Color(0xFF1A1A1A),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _toggleSpeed,
+                  icon: const Icon(Icons.speed, color: Colors.amber, size: 20),
+                  label: Text(
+                    'TEMPO: ${currentSpeed}x',
+                    style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.bold),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.amber),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: _togglePlayPause,
+                  icon: Icon(isPlaying ? Icons.pause : Icons.play_arrow, color: Colors.black),
+                  label: Text(
+                    isPlaying ? 'PAUZA' : 'START',
+                    style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold, letterSpacing: 1.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                ),
+              ],
             ),
           ),
 
-          // 2. ROZPISKA RUCHÓW
+          const Divider(height: 1, color: Colors.white12, thickness: 1),
+
+          // 3. ROZPISKA RUCHÓW (Oryginalna, niezmieniona logika)
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 80), // <--- TUTAJ ZMIEŃ PADDING!
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
               children: [
                 const Text(
                   'ROZPISKA RUCHÓW (Kliknij, by odtworzyć fragment)',
@@ -157,9 +245,6 @@ class _KataDetailScreenState extends State<KataDetailScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                // ==========================================
-                // NOWY PRZYCISK: Pojawia się tylko podczas pętli
-                // ==========================================
                 if (_startSeconds != null && _endSeconds != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 15.0),
@@ -190,21 +275,18 @@ class _KataDetailScreenState extends State<KataDetailScreen> {
                     KataMove move = entry.value;
                     bool hasVideoFragment = move.startSeconds != null;
 
-                    // 2. NAPRAWA LOGIKI RAMKI
-                    // Teraz sprawdzamy czy _startSeconds nie jest nullem ORAZ czy się zgadza
                     bool isCurrentlyPlaying = (_startSeconds != null && move.startSeconds != null && _startSeconds == move.startSeconds);
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: InkWell(
-                        onTap: (hasVideoFragment && _controller != null)
+                        onTap: hasVideoFragment
                             ? () => _playFragment(context, move.startSeconds!, move.endSeconds)
                             : null,
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
                           padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            // Podświetlamy ruch mocniej, jeśli właśnie leci w pętli
                             color: isCurrentlyPlaying
                                 ? Colors.amber.withOpacity(0.15)
                                 : (hasVideoFragment ? Colors.white.withOpacity(0.05) : Colors.transparent),
@@ -246,7 +328,6 @@ class _KataDetailScreenState extends State<KataDetailScreen> {
                               if (hasVideoFragment)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 8.0),
-                                  // Jeśli pętla jest aktywna na tym fragmencie, pokaż kręcące się kółko, jeśli nie – ikonę Play
                                   child: isCurrentlyPlaying
                                       ? const Icon(Icons.loop, color: Colors.amber, size: 24)
                                       : const Icon(Icons.play_circle_outline, color: Colors.amber, size: 24),
