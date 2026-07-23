@@ -350,7 +350,7 @@ class KarateData {
             startPosition: 'Fudo-Dachi / Yoi',
             endPosition: 'Yame (lewą nogę cofnij do prawej i przesuń w bok do pozycji Fudo-Dachi).',
             moves: [
-              // Symulujemy, że sprawdziłeś wideo i ten ruch jest od 12 do 15 sekundy
+              // ten ruch jest od 12 do 15.7 sekundy
               KataMove(
                 instruction: 'Obrót 90° w lewo z wejściem do Hidari-Zenkutsu-Dachi / Hidari-Uraken-Ganmen-Uchi / Seiken-Chudan-Gyaku-Tsuki / Kiai.',
                 startSeconds: 12,
@@ -361,7 +361,6 @@ class KarateData {
                 startSeconds: 16,
                 endSeconds: 18,
               ),
-              // Jeśli kiedyś nie będziesz znał czasu jakiegoś ruchu, po prostu go nie podajesz
               KataMove(
                 instruction: 'Obrót 90° w lewo do pozycji walki Kiai.',
                 startSeconds: 18,
@@ -379,10 +378,12 @@ class KarateData {
           ),
           Kata(name: 'Kihon Kata Sono Ni'),
           Kata(name: 'Kihon Kata Sono San'),
-          Kata(name: 'Kihon Kata Sono Yon'),
+          Kata(name: 'Kihon Kata Sono Shi/Yon'), //Shi lub Yon
           Kata(name: 'Kihon Kata Sono Go'),
           // Celowo pominięte (6), bo nikt nigdy tego nie robi
-          Kata(name: 'Kihon Kata Sono Nana'),
+          // Jednak dodaje (6), bo jest znacznie inne niż reszta
+          Kata(name: 'Kihon Kata Sono Roku'),
+          Kata(name: 'Kihon Kata Sono Shichi/Nana'), //Shichi lub Nana
           Kata(name: 'Kihon Kata Sono Hachi'),
         ]
     ),
@@ -407,7 +408,7 @@ class KarateData {
         katas: [
           Kata(name: 'Tonfa Kihon Sono Ichi', description: 'Broń: Tonfa'),
           Kata(name: 'Tonfa Kihon Sono Ni', description: 'Broń: Tonfa'),
-          Kata(name: 'Tonfa Kihon Sono San', description: 'Broń: Tonfa'),
+          Kata(name: 'Tonfa Kihon Sono San', youtubeUrl: 'https://www.youtube.com/watch?v=G-l9v-6DwFM', startPosition: 'Fudo-Dachi / Yoi', endPosition: 'Yame (lewą nogę cofnij do prawej i przesuń w bok do pozycji Fudo-Dachi).', description: 'Broń: Tonfa', moves: []),
           Kata(name: 'Tonfa Taizan', description: 'Broń: Tonfa'),
           Kata(name: 'Bo Kihon Sono Ichi', description: 'Broń: Kij (Bo)'),
           Kata(name: 'Bo Kihon Sono Ni', description: 'Broń: Kij (Bo)'),

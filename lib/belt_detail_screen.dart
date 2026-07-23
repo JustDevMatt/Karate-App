@@ -11,34 +11,37 @@ class BeltDetailScreen extends StatelessWidget {
   // ==========================================================
   // GŁÓWNY "MÓZG" KLIKNIĘĆ - kieruje ruch do odpowiednich akcji
   // ==========================================================
+
   void _handleItemTap(BuildContext context, String item) {
-    // 1. Sprawdzamy, czy kliknięto KATA (Dla testu: Kai-Ha)
-    if (item.contains('Kai-Ha')) {
+    // 1. Sprawdzamy, czy kliknięto KATA (Dla testu: Tonfa Kihon Sono San)
+    if (item.contains('Tonfa-Kihon-Sono-San') || item.contains('Tonfa Kihon Sono San')) {
       Kata? foundKata;
       try {
-        // Docelowo aplikacja przeszuka listę układów
+        // Docelowo aplikacja przeszuka listę układów (SZUKAMY ZE SPACJAMI, tak jak w bazie! - co może się zminić w przyszłości)
         foundKata = KarateData.oyamaKatas
             .expand((category) => category.katas)
-            .firstWhere((k) => k.name.contains('Kai-Ha'));
+            .firstWhere((k) => k.name == 'Tonfa Kihon Sono San');
       } catch (e) {
-        // ZAŚLEPKA TESTOWA: Jeśli Kai-Ha nie ma jeszcze w bazie
+        // ZAŚLEPKA AWARYJNA: Jeśli funkcja znowu nie znajdzie nazwy
         foundKata = Kata(
-          name: 'Kai-Ha (Wersja Testowa)',
-          youtubeUrl: 'https://www.youtube.com/watch?v=TWójLinkTestowy', // Tu możesz wstawić byle jaki film
+          name: 'Błąd wczytywania',
+          youtubeUrl: '',
           moves: [
-            KataMove(instruction: "Testowy ruch 1"),
-            KataMove(instruction: "Testowy ruch 2"),
+            KataMove(instruction: "Nie znaleziono układu w bazie."),
           ],
         );
       }
 
+      // Jeśli znaleźliśmy, otwieramy ekran
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => KataDetailScreen(kata: foundKata!),
         ),
       );
+      return; // Przerywamy dalsze sprawdzanie
     }
+
     // 2. Sprawdzamy, czy kliknięto TECHNIKĘ (Ushiro Tobi Geri)
     else if (item.contains('USHIRO-TOBI-GERI')) {
       _showTechniqueBottomSheet(
@@ -186,7 +189,7 @@ class BeltDetailScreen extends StatelessWidget {
                 const SizedBox(height: 10),
                 ...items.map((item) {
                   // LOGIKA WIZUALNA: Jeśli nazwa zawiera jedno z tych słów, podświetlamy ją!
-                  bool isClickable = item.contains('Kai-Ha') || item.contains('USHIRO-TOBI-GERI');
+                  bool isClickable = item.contains('Tonfa-Kihon-Sono-San') || item.contains('USHIRO-TOBI-GERI');
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
