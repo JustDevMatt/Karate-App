@@ -7,6 +7,7 @@ import 'kata_detail_screen.dart';
 import 'belt_detail_screen.dart';
 import 'history_screen.dart';
 import 'package:url_launcher/url_launcher.dart'; //Do linków poza aplikację
+import 'calendar_screen.dart';
 
 class BeltScreen extends StatefulWidget {
   final String styleName;
@@ -433,7 +434,7 @@ class _BeltScreenState extends State<BeltScreen> {
               decoration: BoxDecoration(color: Colors.black),
               child: Icon(Icons.sports_martial_arts, color: Colors.amber, size: 60),
             ),
-            //Wybór stylu karate
+            // Wybór stylu karate
             ListTile(
               leading: const Icon(Icons.home, color: Colors.amber),
               title: Text(AppDictionary.home, style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -441,7 +442,7 @@ class _BeltScreenState extends State<BeltScreen> {
                 Navigator.of(context).popUntil((route) => route.isFirst);
               },
             ),
-            //Historia Stylu
+            // Historia Stylu
             ListTile(
               leading: const Icon(Icons.book, color: Colors.amber),
               title: Text(AppDictionary.styleHistory, style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -455,7 +456,22 @@ class _BeltScreenState extends State<BeltScreen> {
                 );
               },
             ),
-            //Okiem sportowca
+            if (AppDictionary.isPolish) ...[ // Te '...' oznaczają "rozpakuj te elementy i wrzuć je tutaj, jeśli warunek jest spełniony"
+              // Ten kafelek wyświetli się TYLKO jeśli isPolish to prawda
+              ListTile(
+                leading: const Icon(Icons.calendar_month, color: Colors.amber),
+                title: const Text('Kalendarz PFK 2026', style: TextStyle(color: Colors.white, fontSize: 16)),
+                subtitle: const Text('Zawody, seminaria i sesje', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CalendarScreen()),
+                  );
+                },
+              ),
+            ],
+            // Okiem sportowca
             ListTile(
               leading: const Icon(Icons.smart_display, color: Colors.redAccent),
               title: Text(AppDictionary.news, style: const TextStyle(color: Colors.white, fontSize: 16)),
@@ -465,7 +481,7 @@ class _BeltScreenState extends State<BeltScreen> {
                 // TODO: jak się zgodzi twórca, to dodam działający link. Na ten moment ten kafelek będzie widoczny, ale nie funkcjonalny.
               },
             ),
-            //Postaw mi kawę
+            // Postaw mi kawę
             const Divider(color: Colors.white24), // Linia oddzielająca
             ListTile(
               leading: const Icon(Icons.local_cafe, color: Colors.amber),
@@ -481,6 +497,7 @@ class _BeltScreenState extends State<BeltScreen> {
                 }
               },
             ),
+            // Twitter, czy tam 'X'
             const Divider(color: Colors.white24, thickness: 1), // Linia oddzielająca (opcjonalna, dla zachowania porządku) - nie mogę się zdecydować, czy zostawić ją czy nie
             ListTile(
               leading: const Icon(Icons.rocket_launch, color: Colors.amber),
