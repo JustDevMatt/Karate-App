@@ -28,7 +28,7 @@ class AppDictionary {
   static String get katas => isPolish ? 'KATA' : 'KATAS';
   static String get requirements => isPolish ? 'WYMAGANIA' : 'REQUIREMENTS';
   static String get techniques => isPolish ? 'TECHNIKI' : 'TECHNIQUES';
-  static String get flashcards => isPolish ? 'FISZKI' : 'FLASHCARDS';
+  static String get dictionary => isPolish ? 'SŁOWNIK' : 'DICTIONARY';
 
   // Tymczasowe teksty na środku ekranu
   static String kataSection(String style) => isPolish
