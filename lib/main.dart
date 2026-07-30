@@ -14,15 +14,22 @@ class KarateApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Oyama & Kyokushin App',
+      title: 'Oyama Karate App', // W tej wersji na razie tylko dla OYAMA Karate
       theme: ThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: const Color(0xFF121212),
       ),
-      home: const StyleSelectionScreen(),
+      // Omijamy ekran wyboru i ładujemy od razu Oyama Karate
+      home: const BeltScreen(styleName: 'OYAMA KARATE'),
+      // W przyszłości, żeby przywrócić wybór stylu, zmienić na:
+      // home: const StyleSelectionScreen(),
     );
   }
 }
+
+// ===================================================================
+// Poniższy kod zostaje bezpiecznie w pliku na przyszłe wersje aplikacji
+// ===================================================================
 
 class StyleSelectionScreen extends StatelessWidget {
   const StyleSelectionScreen({super.key});

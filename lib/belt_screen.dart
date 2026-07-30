@@ -621,14 +621,15 @@ class _BeltScreenState extends State<BeltScreen> {
               decoration: BoxDecoration(color: Colors.black),
               child: Icon(Icons.sports_martial_arts, color: Colors.amber, size: 60),
             ),
-            // Wybór stylu karate
-            ListTile(
-              leading: const Icon(Icons.home, color: Colors.amber),
-              title: Text(AppDictionary.home, style: const TextStyle(color: Colors.white, fontSize: 16)),
-              onTap: () {
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              },
-            ),
+            // // Wybór stylu karate
+            // ListTile(
+            //   leading: const Icon(Icons.home, color: Colors.amber),
+            //   title: Text(AppDictionary.home, style: const TextStyle(color: Colors.white, fontSize: 16)),
+            //   onTap: () {
+            //     Navigator.of(context).popUntil((route) => route.isFirst);
+            //   },
+            // ),
+            // TODO: Jak będzie jednak zamysł aplikacji na dwa style, to ta sekcja wróci do menu bocznego
             // Historia Stylu
             ListTile(
               leading: const Icon(Icons.book, color: Colors.amber),
