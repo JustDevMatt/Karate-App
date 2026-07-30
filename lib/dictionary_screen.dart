@@ -14,14 +14,32 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   DictCategory _selectedCategory = DictCategory.numbers;
   String _searchQuery = '';
 
-  // Filtracja: wybiera słówka z danej kategorii I pasujące do wyszukiwarki
+  // 1. INTELIGENTNE FILTROWANIE: bez szukania -> tylko wybrana kategoria; z szukaniem -> wszystko (wybrana kategoria na górze)
   List<DictionaryItem> get _filteredItems {
-    return oyamaDictionary.where((item) { // <--- ZMIANA TUTAJ
-      final matchesCategory = item.category == _selectedCategory;
-      final matchesSearch = item.japanese.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          item.polish.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+    // 1. KROK: Gdy wyszukiwarka jest PUSTA -> pokazujemy tylko wybraną zakładkę
+    if (_searchQuery.trim().isEmpty) {
+      return oyamaDictionary
+          .where((item) => item.category == _selectedCategory)
+          .toList();
+    }
+
+    // 2. KROK: Gdy użytkownik COŚ WPISAŁ -> szukamy w CAŁEJ bazie (bez sprawdzania kategorii!)
+    final query = _searchQuery.trim().toLowerCase();
+    final matches = oyamaDictionary.where((item) {
+      return item.japanese.toLowerCase().contains(query) ||
+          item.polish.toLowerCase().contains(query);
     }).toList();
+
+    // 3. KROK: Sortujemy wyniki -> słówka z obecnie klikniętej zakładki lądują na samej górze
+    matches.sort((a, b) {
+      final aIsSelected = a.category == _selectedCategory;
+      final bIsSelected = b.category == _selectedCategory;
+      if (aIsSelected && !bIsSelected) return -1;
+      if (!aIsSelected && bIsSelected) return 1;
+      return 0;
+    });
+
+    return matches;
   }
 
   // Funkcja otwierająca tryb fiszek z przefiltrowaną listą
@@ -186,16 +204,35 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                           ),
                         ),
                       ),
-                      // Tłumaczenie polskie
+                      // 2. Tłumaczenie polskie + podpis kategorii przy wyszukiwaniu globalnym
                       Expanded(
                         flex: 6,
-                        child: Text(
-                          item.polish,
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              item.polish,
+                              textAlign: TextAlign.right,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                              ),
+                            ),
+                            // Wyświetla mały podpis, gdy słówko jest z innej zakładki podczas wyszukiwania
+                            if (_searchQuery.isNotEmpty && item.category != _selectedCategory)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text(
+                                  item.category.label,
+                                  style: TextStyle(
+                                    color: Colors.amber.withOpacity(0.7),
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],

@@ -33,15 +33,7 @@ class _BeltScreenState extends State<BeltScreen> {
   DictCategory _selectedDictCategory = DictCategory.numbers;
   String _dictSearchQuery = '';
 
-  // Filtr słówek: kategoria + pasujący tekst (po japońsku lub polsku)
-  List<DictionaryItem> get _filteredDictionaryItems {
-    return oyamaDictionary.where((item) {
-      final matchesCategory = item.category == _selectedDictCategory;
-      final matchesSearch = item.japanese.toLowerCase().contains(_dictSearchQuery.toLowerCase()) ||
-          item.polish.toLowerCase().contains(_dictSearchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
-  }
+
 
   // Ta funkcja decyduje, co wyświetlić na środku ekranu
   Widget _buildBody() {
@@ -53,7 +45,7 @@ class _BeltScreenState extends State<BeltScreen> {
       case 2:
         return _buildTechniquesSection();
       case 3:
-        return _buildDictionarySection();
+        return const DictionaryScreen();
       default:
         return const SizedBox.shrink();
     }
@@ -412,177 +404,7 @@ class _BeltScreenState extends State<BeltScreen> {
     );
   }
 
-  // SEKCJA SŁOWNIKA
-  Widget _buildDictionarySection() {
-    return Column(
-      children: [
-        // --- 1. PASEK WYSZUKIWARKI ---
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: TextField(
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Szukaj słówka (jp / pl)...',
-              hintStyle: const TextStyle(color: Colors.white38),
-              prefixIcon: const Icon(Icons.search, color: Colors.amber),
-              filled: true,
-              fillColor: const Color(0xFF1E1E1E),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            ),
-            onChanged: (value) {
-              setState(() {
-                _dictSearchQuery = value;
-              });
-            },
-          ),
-        ),
 
-        // --- 2. PRZEŁĄCZNIK 4 KATEGORII ---
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: DictCategory.values.map((category) {
-              final isSelected = _selectedDictCategory == category;
-              return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: ChoiceChip(
-                  label: Text(
-                    category.label,
-                    style: TextStyle(
-                      color: isSelected ? Colors.black : Colors.white70,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                    ),
-                  ),
-                  selected: isSelected,
-                  selectedColor: Colors.amber,
-                  backgroundColor: const Color(0xFF1E1E1E),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    side: BorderSide(
-                      color: isSelected ? Colors.amber : Colors.white12,
-                    ),
-                  ),
-                  onSelected: (selected) {
-                    if (selected) {
-                      setState(() {
-                        _selectedDictCategory = category;
-                      });
-                    }
-                  },
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-
-        // --- 3. PRZYCISK: FISZKI DLA WYBRANEJ KATEGORII ---
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amber,
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.style, size: 22),
-              label: Text(
-                'FISZKI: ${_selectedDictCategory.label.toUpperCase()} (${_filteredDictionaryItems.length})',
-                style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 0.8),
-              ),
-              onPressed: () {
-                if (_filteredDictionaryItems.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Brak słówek w tej kategorii do nauki!')),
-                  );
-                  return;
-                }
-
-                // TODO: FISZKI (Nie wiadomo czy będą w ogóle)
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => FlashcardsScreen(items: _filteredDictionaryItems),
-                //   ),
-                // );
-                debugPrint('Otwieram fiszki dla: ${_selectedDictCategory.label} (${_filteredDictionaryItems.length} pojęć)');
-              },
-            ),
-          ),
-        ),
-
-        const Divider(color: Colors.white12, height: 16),
-
-        // --- 4. LISTA SŁÓWEK ---
-        Expanded(
-          child: _filteredDictionaryItems.isEmpty
-              ? const Center(
-            child: Text(
-              'Brak słówek w tej kategorii / wynikach.',
-              style: TextStyle(color: Colors.white38),
-            ),
-          )
-              : ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
-            itemCount: _filteredDictionaryItems.length,
-            itemBuilder: (context, index) {
-              final item = _filteredDictionaryItems[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.white10),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Termin japoński (Złoty, pogrubiony)
-                    Expanded(
-                      flex: 5,
-                      child: Text(
-                        item.japanese,
-                        style: GoogleFonts.oswald(
-                          textStyle: const TextStyle(
-                            color: Colors.amber,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    // Tłumaczenie polskie
-                    Expanded(
-                      flex: 6,
-                      child: Text(
-                        item.polish,
-                        textAlign: TextAlign.right,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
